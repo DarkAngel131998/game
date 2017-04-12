@@ -1,0 +1,84 @@
+#include <iostream>
+#include <stdlib.h>
+#include <time.h>
+
+using namespace std;
+int base[10][10];
+void coutNearMine(const int m,const int n, int x, int y);
+void randomMine(const int m,const int n,const int k);
+void renderGame(int m, int n);
+bool win(const int numberSlot, int numberCout);
+
+
+int main() {
+    int m, n, k, dead=0, numberCout=0;
+    cin >> m >> n >> k;
+    int numberSlot=m*n-k;
+    randomMine(m, n, k);
+    renderGame(m, n);
+    while(dead==0) {
+        int x, y;
+        cin >> x >> y;
+        if(base[x][y]==-1) {
+            cout << "BOOM!!! You are dead." << endl;
+            dead=1;
+        }
+        numberCout++;
+        coutNearMine(m, n, x, y);
+        renderGame(m, n);
+        if(win(numberSlot, numberCout)==1) {
+            cout << "You win!!!" << endl;
+            return 0;
+        }
+    }
+    if(win(numberSlot, numberCout)==1) {
+        cout << "You win!!!" << endl;
+        return 0;
+    }
+    return 0;
+}
+void randomMine(const int m,const int n,const int k) {
+    int numberOfBoom = k;
+    int x, y;
+    while(numberOfBoom) {
+        srand(time(0));
+        x = rand() % m;
+        y = rand() % n;
+        srand(time(0));
+        if(base[x][y]==0) {
+            numberOfBoom--;
+        }
+        base[x][y] = -1;
+    }
+}
+void coutNearMine(const int m,const int n, int x, int y) {
+    int i, j, number=0;
+    for(i=y-1;i<=y+1;i++) {
+        for(j=x-1;j<=x+1;j++) {
+           if(base[i][j] == -1) number++;
+        }
+    }
+    if(number==0) number=9;
+    base[x][y]=number;
+}
+void renderGame(int m, int n) {
+    int i,j;
+    for(i=0;i<m;i++) {
+        for(j=0;j<n;j++) {
+            if(base[i][j]==-1 || base[i][j]==0) {
+                cout << '*' << " ";
+            }
+            if(base[i][j]==9) {
+                cout << "0" << " ";
+            }
+            if(base[i][j]>0 && base[i][j]<=8) {
+                cout << base[i][j] << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+bool win(const int numberSlot, int numberCout) {
+    if (numberCout==numberSlot) return 1;
+    else return 0;
+}
