@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
         }
     }
     SDL_UpdateWindowSurface(window);
-    int k=1,dead=0, score=0;
+    int k=1, score=0;
     int numberSlot=2*2-1;
     randomMine(2, 2, 1);
      while (numberSlot != score) {
@@ -74,28 +74,31 @@ int coutNearMine(int x , int y) {
     int i, j, number=0;
     if(board[x][y] == -1 ){
         board[x][y] == -1;
-        return 0;
+        return -1;
     }
-    for(i=y-1;i<=y+1;i++) {
-        for(j=x-1;j<=x+1;j++) {
-           if(board[i][j] == -1) number++;
+    for(i=-1;i<2;i++) {
+        for(j=-1;j<2;j++) {
+           if(x+i>=0 && x+i<=1 && y+j>=0 && y+j<=1){
+                if(board[x+i][y+j] == -1) number+=1;
+           }
         }
     }
-    if(number==0) number=9;
-    board[x][y]=number;
+    if(number == 0) number = 9;
+    return number;
 }
 int mouseleft(int x,int y,int score){
     SDL_Rect filled_rect;
     filled_rect.x = (x/40)*40;
     filled_rect.y = (y/40)*40;
-    x = x/40 -5;
-    y = y/40 -5;
+    x = (x/40) - 5;
+    y = (y/40) - 5;
     if (check[x][y] % 2 !=0){
         SDL_Surface* flag = SDL_LoadBMP("flag.bmp");
         SDL_BlitSurface(flag,NULL,windowSurface, &filled_rect);
     }
     else{
-        coutNearMine(x,y);
+        board[x][y] = coutNearMine(x,y);
+        cout << board[x][y];
         if(1<=board[x][y] && board[x][y] <= 9){
             SDL_Surface* status = SDL_LoadBMP(PLOT_IMAGE[board[x][y]]);
             SDL_BlitSurface(status,NULL,windowSurface,&filled_rect);
@@ -104,7 +107,7 @@ int mouseleft(int x,int y,int score){
         else{
             for(x=0;x<=1;x++){
                 for(y=0;y<=1;y++){
-                    coutNearMine(x,y);
+                    board[x][y] = coutNearMine(x,y);
                     filled_rect.x = 40*(x+5);
                     filled_rect.y = 40*(y+5);
                     score = 3;
