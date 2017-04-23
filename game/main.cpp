@@ -95,11 +95,7 @@ int mouseleft(int x,int y,int score){
     filled_rect.y = (y/42)*42;
     x = (x/42) - 5;
     y = (y/42) - 5;
-    if (check[x][y] % 2 !=0){
-        SDL_Surface* flag = SDL_LoadBMP("flag.bmp");
-        SDL_BlitSurface(flag,NULL,windowSurface, &filled_rect);
-    }
-    else{
+    if (check[x][y] %2 == 0){
         board[x][y] = coutNearMine(x,y);
         cout << board[x][y];
         if(1<=board[x][y] && board[x][y] <= 9){
