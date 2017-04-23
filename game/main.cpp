@@ -20,6 +20,7 @@ void logSDLError(std::ostream& os, const std::string &msg, bool fatal = false);
 void initSDL(SDL_Window* &window, SDL_Surface* &windowSurface);
 void quitSDL(SDL_Window* window, SDL_Surface* windowSurface);
 int mouseleft(int x, int y,int score);
+void mouseright(int x,int y);
 void waitUntilKeyPressed();
 
 
@@ -36,23 +37,25 @@ int main(int argc, char* argv[]) {
         }
     }
     SDL_UpdateWindowSurface(window);
-    int k=6, score=0;
+    int k=6, score=0 ,a;
     int numberSlot=6*6-6;
     randomMine(6, 6, 6);
-     while (numberSlot != score) {
+     while (numberSlot != score&& score!= -1) {
+            a =score;
             SDL_Event e;
         SDL_Delay(10);
         if ( SDL_WaitEvent(&e) == 0) continue;
         if (e.type == SDL_QUIT) break;
         if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) break;
         if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if (e.button.button == SDL_BUTTON_LEFT)
-                if(210<= e.button.x && e.button.x<= 462 && e.button.y >=210 && e.button.y <=462)
-                score = mouseleft(e.button.x,e.button.y, score);
-
+            if(210<= e.button.x && e.button.x<= 462 && e.button.y >=210 && e.button.y <=462)
+                if (e.button.button == SDL_BUTTON_LEFT){
+                    score = mouseleft(e.button.x,e.button.y, score);
+                }
+                else mouseright(e.button.x,e.button.y);
+            }
         }
-    }
-
+    cout << a;
     waitUntilKeyPressed();
     return 0;
 }
@@ -120,7 +123,7 @@ int mouseleft(int x,int y,int score){
                     }
                 }
             }
-            score = 30 ;
+            score = -1 ;
         }
 
     }
@@ -128,6 +131,27 @@ int mouseleft(int x,int y,int score){
     return score;
 
 
+}
+void mouseright(int x,int y){
+    SDL_Rect flag;
+    flag.x = (x/42)*42;
+    flag.y = (y/42)*42;
+    x = x/42 -5;
+    y = y/42 - 5;
+    check[x][y]++;
+    if(check[x][y] %2 !=0 ){
+        if(board[x][y]==0 || board[x][y]== -1){
+            SDL_Surface* flag1 = SDL_LoadBMP("flag.bmp");
+            SDL_BlitSurface(flag1, NULL , windowSurface , &flag);
+        }
+    }
+    else {
+        if(board[x][y] ==0 || board[x][y] == -1 ){
+            SDL_Surface* normal = SDL_LoadBMP("normal.bmp");
+            SDL_BlitSurface(normal,NULL,windowSurface,&flag);
+        }
+    }
+    SDL_UpdateWindowSurface(window);
 }
 
 bool win(const int numberSlot, int numberCout) {
