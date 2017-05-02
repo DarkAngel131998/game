@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
     SDL_BlitSurface(background,NULL,windowSurface,NULL);
     srand(time(0));
     int score=0 ;
-    int numberSlot=6*6-2;
-    randomMine(6, 6, 2);
+    int numberSlot=6*6-9;
+    randomMine(6, 6, 9);
     SDL_Surface* normal = NULL ;
     normal = SDL_LoadBMP("normal.bmp");
     for(int i=252;i<=462;i+=42){
