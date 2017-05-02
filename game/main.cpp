@@ -1,3 +1,4 @@
+// MineSweeper
 #include <iostream>
 #include <SDL.h>
 #include <stdlib.h>
@@ -5,22 +6,25 @@
 
 using namespace std;
 
-int board[6][6];
-int check[6][6];
-int coutNearMine(int x, int y);
-void randomMine(const int m,const int n,const int k);
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 680;
-const string WINDOW_TITLE = "Duy's minesweeper game";
+const string WINDOW_TITLE = "Duy's Minesweeper Game";
 SDL_Window* window ;
 SDL_Surface* windowSurface ;
 const char* number_bmp[10] = {"freq_0.bmp","freq_1.bmp", "freq_2.bmp","freq_3.bmp","freq_4.bmp","freq_5.bmp","freq_6.bmp","freq_7.bmp","freq_8.bmp","freq_0.bmp"};
 void logSDLError(std::ostream& os, const std::string &msg, bool fatal = false);
 void initSDL(SDL_Window* &window, SDL_Surface* &windowSurface);
 void quitSDL(SDL_Window* window, SDL_Surface* windowSurface);
+void waitUntilKeyPressed();
+int board[6][6];
+int checkflag[6][6];
+int opened[6][6];
+void randomMine(const int m,const int n,const int k);
+int coutNearMine(int x, int y);
+int openNear(int x, int y, int score);
 int mouseleft(int x, int y,int score);
 void mouseright(int x,int y);
-void waitUntilKeyPressed();
+
 
 
 int main(int argc, char* argv[]) {
@@ -36,8 +40,8 @@ int main(int argc, char* argv[]) {
     SDL_BlitSurface(background,NULL,windowSurface,NULL);
     srand(time(0));
     int score=0 ;
-    int numberSlot=6*6-6;
-    randomMine(6, 6, 6);
+    int numberSlot=6*6-2;
+    randomMine(6, 6, 2);
     SDL_Surface* normal = NULL ;
     normal = SDL_LoadBMP("normal.bmp");
     for(int i=252;i<=462;i+=42){
@@ -60,6 +64,7 @@ int main(int argc, char* argv[]) {
             if(252<= e.button.x && e.button.x<= 502 && e.button.y >=252 && e.button.y <=502)
                 if (e.button.button == SDL_BUTTON_LEFT){
                     score = mouseleft(e.button.x,e.button.y, score);
+                    cout << score << " ";
                 }
                 else mouseright(e.button.x,e.button.y);
         }
@@ -69,8 +74,12 @@ int main(int argc, char* argv[]) {
     if(score == -1){
         background = SDL_LoadBMP("loose.bmp");
         SDL_BlitSurface(background,NULL,windowSurface,NULL);
-        SDL_UpdateWindowSurface(window);
     }
+    else {
+        background = SDL_LoadBMP("Win.bmp");
+        SDL_BlitSurface(background,NULL,windowSurface,NULL);
+    }
+    SDL_UpdateWindowSurface(window);
     waitUntilKeyPressed();
     quitSDL(window,windowSurface);
     return 0;
@@ -104,22 +113,51 @@ int countNearMine(int x , int y) {
     if(number == 0) number = 9;
     return number;
 }
+int openNear(int x,int y,int score){
+    opened[x][y]= 1;
+    SDL_Rect filled_rect1;
+    filled_rect1.x = 42*(y+6);
+    filled_rect1.y = 42*(x+6);
+    board[x][y] = countNearMine(x,y);
+    if(1<=board[x][y] && board[x][y] <= 9 ){
+        SDL_Surface* status1 = SDL_LoadBMP(number_bmp[board[x][y]]);
+        SDL_BlitSurface(status1,NULL,windowSurface,&filled_rect1);
+        score ++;
+    }
+    SDL_UpdateWindowSurface(window);
+    if(board[x][y] == 9){
+        for(int i = -1;i < 2;i++){
+            for ( int j = -1;j < 2;j++){
+                if(i != 0 || j != 0){
+                    if(x+i>=0 && x+i <= 5 && y+j>=0 && y+j<=5){
+                        if(opened[x+i][y+j] == 0){
+                            score = openNear(x+i,y+j,score);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return score;
+}
 int mouseleft(int x,int y,int score){
-    cout << x <<" "<< y << " ";
     SDL_Rect filled_rect;
     filled_rect.x = (x/42)*42;
     filled_rect.y = (y/42)*42;
     x = (x/42) - 6;
     y = (y/42) - 6;
-    if (check[y][x] %2 == 0){
+    if (checkflag[y][x] %2 == 0){
         board[y][x] = countNearMine(y,x);
-        //cout << board[x][y];
-        if(1<=board[y][x] && board[y][x] <= 9){
+        if (board[y][x] == 9 && opened[y][x] == 0){
+            score = openNear(y,x,score);
+        }
+        if(1<=board[y][x] && board[y][x] <= 8 && opened[y][x]==0){
+            opened[y][x] = 1;
             SDL_Surface* status = SDL_LoadBMP(number_bmp[board[y][x]]);
             SDL_BlitSurface(status,NULL,windowSurface,&filled_rect);
             score++;
         }
-        else{
+        if (board[y][x]== -1){
             for(x=0;x<=5;x++){
                 for(y=0;y<=5;y++){
                     board[x][y] = countNearMine(x,y);
@@ -150,8 +188,8 @@ void mouseright(int x,int y){
     flag.y = (y/42)*42;
     x = x/42 - 6;
     y = y/42 - 6;
-    check[y][x]++;
-    if(check[y][x] %2 !=0 ){
+    checkflag[y][x]++;
+    if(checkflag[y][x] %2 !=0 ){
         if(board[y][x]==0 || board[y][x]== -1){
             SDL_Surface* flag1 = SDL_LoadBMP("flag.bmp");
             SDL_BlitSurface(flag1, NULL , windowSurface , &flag);
