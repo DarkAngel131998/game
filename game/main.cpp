@@ -11,11 +11,10 @@ const int SCREEN_HEIGHT = 680;
 const string WINDOW_TITLE = "Duy's Minesweeper Game";
 SDL_Window* window ;
 SDL_Surface* windowSurface ;
-const char* number_bmp[10] = {"freq_0.bmp","freq_1.bmp", "freq_2.bmp","freq_3.bmp","freq_4.bmp","freq_5.bmp","freq_6.bmp","freq_7.bmp","freq_8.bmp","freq_0.bmp"};
+const char* number_bmp[10] = {"n0.bmp","n1.bmp", "n2.bmp","n3.bmp","n4.bmp","n5.bmp","n6.bmp","n7.bmp","n8.bmp","n0.bmp"};
 void logSDLError(std::ostream& os, const std::string &msg, bool fatal = false);
 void initSDL(SDL_Window* &window, SDL_Surface* &windowSurface);
 void quitSDL(SDL_Window* window, SDL_Surface* windowSurface);
-void waitUntilKeyPressed();
 int board[6][6];
 int checkflag[6][6];
 int opened[6][6];
@@ -28,59 +27,103 @@ void mouseright(int x,int y);
 
 
 int main(int argc, char* argv[]) {
+    bool playagain = true;
     //make SDL and start the game
     initSDL(window,windowSurface);
     SDL_Surface* background = NULL;
     background = SDL_LoadBMP("start.bmp");
     SDL_BlitSurface(background,NULL,windowSurface,NULL);
     SDL_UpdateWindowSurface(window);
-    waitUntilKeyPressed() ;
-    // make the board
-    background = SDL_LoadBMP("background.bmp");
-    SDL_BlitSurface(background,NULL,windowSurface,NULL);
-    srand(time(0));
-    int score=0 ;
-    int numberSlot=6*6-9;
-    randomMine(6, 6, 9);
-    SDL_Surface* normal = NULL ;
-    normal = SDL_LoadBMP("normal.bmp");
-    for(int i=252;i<=462;i+=42){
-        for(int j=252;j<=462;j+=42){
-         SDL_Rect location;
-            location.x = i;
-            location.y = j;
-            SDL_BlitSurface(normal,NULL,windowSurface, &location);
-        }
-    }
-    SDL_UpdateWindowSurface(window);
-    //begin play game
-    while (numberSlot != score && score!= -1) {
+    while (true) {
         SDL_Event e;
-        SDL_Delay(10);
         if ( SDL_WaitEvent(&e) == 0) continue;
-        if (e.type == SDL_QUIT) break;
-        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) break;
+        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) return 0;
+        if (e.type == SDL_QUIT){
+            quitSDL(window,windowSurface);
+            return 0;
+        }
         if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if(252<= e.button.x && e.button.x<= 502 && e.button.y >=252 && e.button.y <=502)
-                if (e.button.button == SDL_BUTTON_LEFT){
-                    score = mouseleft(e.button.x,e.button.y, score);
-                    cout << score << " ";
-                }
-                else mouseright(e.button.x,e.button.y);
+            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=300 && e.button.y <=357) break;
+            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=396 && e.button.y <=450) {
+                quitSDL(window,windowSurface);
+                return 0;
+            }
         }
     }
-    //check win or loose and end game
-    SDL_Delay(500);
-    if(score == -1){
-        background = SDL_LoadBMP("loose.bmp");
+    //waitUntilKeyPressed() ;
+    // make the board
+    while(playagain){
+        for(int i=0;i<=5;i++){
+            for(int j=0;j<=5;j++){
+                board[i][j] = 0;
+                checkflag[i][j] = 0;
+                opened[i][j]=0;
+            }
+        }
+        background = SDL_LoadBMP("background.bmp");
         SDL_BlitSurface(background,NULL,windowSurface,NULL);
+        srand(time(0));
+        int score=0 ;
+        int numberSlot=6*6-9;
+        randomMine(6, 6, 9);
+        SDL_Surface* normal = NULL ;
+        normal = SDL_LoadBMP("normal.bmp");
+        for(int i=252;i<=462;i+=42){
+            for(int j=252;j<=462;j+=42){
+                SDL_Rect location;
+                location.x = i;
+                location.y = j;
+                SDL_BlitSurface(normal,NULL,windowSurface, &location);
+            }
+        }
+        SDL_UpdateWindowSurface(window);
+        //begin play game
+        while (numberSlot != score && score!= -1) {
+            SDL_Event e;
+            SDL_Delay(10);
+            if ( SDL_WaitEvent(&e) == 0) continue;
+            if (e.type == SDL_QUIT) return 0;
+            if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) return 0;
+            if (e.type == SDL_MOUSEBUTTONDOWN) {
+                if(252<= e.button.x && e.button.x<= 502 && e.button.y >=252 && e.button.y <=502)
+                    if (e.button.button == SDL_BUTTON_LEFT){
+                        score = mouseleft(e.button.x,e.button.y, score);
+                        cout << score << " ";
+                    }
+                    else mouseright(e.button.x,e.button.y);
+            }
+        }
+        //check win or loose and end game
+        SDL_Delay(500);
+        if(score == -1){
+            background = SDL_LoadBMP("loose.bmp");
+            SDL_BlitSurface(background,NULL,windowSurface,NULL);
+        }
+        else {
+            background = SDL_LoadBMP("Win.bmp");
+            SDL_BlitSurface(background,NULL,windowSurface,NULL);
+        }
+        SDL_UpdateWindowSurface(window);
+        while (true) {
+        SDL_Event e;
+        if ( SDL_WaitEvent(&e) == 0) continue;
+        if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) return 0;
+        if (e.type == SDL_QUIT){
+            quitSDL(window,windowSurface);
+            return 0;
+        }
+        if (e.type == SDL_MOUSEBUTTONDOWN) {
+            if(322<= e.button.x && e.button.x<= 470 && e.button.y >=332 && e.button.y <=378) {
+                    playagain = true;
+                    break;
+            }
+            if(322<= e.button.x && e.button.x<= 470 && e.button.y >=405 && e.button.y <=442) {
+                playagain = false;
+                break;
+            }
+        }
     }
-    else {
-        background = SDL_LoadBMP("Win.bmp");
-        SDL_BlitSurface(background,NULL,windowSurface,NULL);
     }
-    SDL_UpdateWindowSurface(window);
-    waitUntilKeyPressed();
     quitSDL(window,windowSurface);
     return 0;
 }
@@ -237,15 +280,6 @@ void quitSDL(SDL_Window* window, SDL_Surface* windowSurface)
 	SDL_Quit();
 }
 
-void waitUntilKeyPressed()
-{
-    SDL_Event e;
-    while (true) {
-        if ( SDL_WaitEvent(&e) != 0 &&
-             (e.type == SDL_KEYDOWN || e.type == SDL_QUIT) )
-            return;
-        SDL_Delay(100);
-    }
-}
+
 //**************************************************************
 
