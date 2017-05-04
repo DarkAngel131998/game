@@ -1,3 +1,5 @@
+//********************************************************************************************************************
+
 // MineSweeper
 #include <iostream>
 #include <SDL.h>
@@ -43,14 +45,13 @@ int main(int argc, char* argv[]) {
             return 0;
         }
         if (e.type == SDL_MOUSEBUTTONDOWN) {
-            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=300 && e.button.y <=357) break;
-            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=396 && e.button.y <=450) {
+            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=300 && e.button.y <=357) break;// play
+            if(306<= e.button.x && e.button.x<= 415 && e.button.y >=396 && e.button.y <=450) {//quit
                 quitSDL(window,windowSurface);
                 return 0;
             }
         }
     }
-    //waitUntilKeyPressed() ;
     // make the board
     while(playagain){
         for(int i=0;i<=5;i++){
@@ -281,5 +282,5 @@ void quitSDL(SDL_Window* window, SDL_Surface* windowSurface)
 }
 
 
-//**************************************************************
+//***************************************************************************************************************************************
 
